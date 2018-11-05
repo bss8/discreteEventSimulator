@@ -23,27 +23,27 @@ public abstract class SchedulingAlgorithm implements iPerformanceMetrics {
     private SchedulerType schedulerType;
     ProcessReadyQueue myQueue;
 
-    static float runningTurnaroundSum = 0f;
-    static float runningBurstTimeSum = 0f;
-    static float runningWaitTimeSum = 0f;
+    static double runningTurnaroundSum = 0f;
+    static double runningBurstTimeSum = 0f;
+    static double runningWaitTimeSum = 0f;
 
     SchedulingAlgorithm() {
 
     }
     @Override
-    public float avgTurnaroundTime(float totalSimTime) {
+    public double avgTurnaroundTime() {
       return runningTurnaroundSum / 10000f;
     }
     @Override
-    public float throughput(float totalSimTime) {
+    public double throughput(double totalSimTime) {
       return 10000f / totalSimTime;
     }
     @Override
-    public float cpuUtilization(float totalSimTime) {
-      return runningBurstTimeSum / totalSimTime;
+    public double cpuUtilization() {
+      return runningBurstTimeSum / 10000f;
     }
     @Override
-    public float avgProcessesInReadyQueue(int lambda) {
+    public double avgProcessesInReadyQueue(int lambda) {
       return lambda * (runningWaitTimeSum/10000f);
     }
 

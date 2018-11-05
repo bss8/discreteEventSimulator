@@ -6,14 +6,14 @@
  */
 class Clock {
 
-    private static float simulationTime;
+    private static double simulationTime;
 
 
-    float getSimulationTime() {
+    double getSimulationTime() {
         return simulationTime;
     }
 
-    void setSimulationTime(float _simulationTime) {
+    void setSimulationTime(double _simulationTime) {
         simulationTime = _simulationTime;
     }
 

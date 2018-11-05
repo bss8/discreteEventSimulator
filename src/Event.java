@@ -4,7 +4,7 @@
  */
 enum EventType {
     ProcessArrival("ProcessArrival"), ProcessCompletion("ProcessCompletion"),
-    TimeSliceOccurrence("TimeSliceOccurrence");
+    TimeSliceOccurrence("TimeSliceOccurrence"), Preemption("Preemption");
 
     private final String eventType;
 
@@ -20,22 +20,22 @@ enum EventType {
 public class Event {
 
     private EventType eventType;
-    private Float eventTime;
+    private Double eventTime;
 
-    Event(EventType eventType, float eventTime) {
+    Event(EventType eventType, double eventTime) {
         this.eventType = eventType;
         this.eventTime = eventTime;
     }
 
 
-    float getEventTime() {
+    double getEventTime() {
         return eventTime;
     }
 
     public EventType getEventType() {
         return eventType;
     }
-    public void setEventTime(float eventTime) {
+    public void setEventTime(double eventTime) {
         this.eventTime = eventTime;
     }
 

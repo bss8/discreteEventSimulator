@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 import static java.lang.Math.log;
@@ -12,7 +16,7 @@ import static java.lang.Math.log;
 public class Simulator {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         if (args.length == 0 || args[0].toLowerCase().equals("help")) {
             printProgramInstructions();
@@ -20,8 +24,8 @@ public class Simulator {
             // initialize system state variables
             final int algorithmType = Integer.parseInt(args[0]);
             final int lambda = Integer.parseInt(args[1]);  // average rate of arrival
-            final float avgServiceTime = Float.parseFloat(args[2]);
-            final float quantumForRR = Float.parseFloat(args[3]);
+            final double avgServiceTime = Double.parseDouble(args[2]);
+            final double quantumForRR = Double.parseDouble(args[3]);
 
             // initialize simulation clock to 0
             Clock simulationClock = new Clock();
@@ -110,7 +114,25 @@ public class Simulator {
 
                     }
                     else if (algorithmType == SchedulerType.RR.getSchedulerType()) {
+                        if (simulationCPU.isBusy()) {
 
+                        } else {
+                            simulationCPU.setMyProcess(p);
+                            simulationCPU.setBusy(true);
+                            // completion if remTime - quantum <=0
+                            if (p.getRemainingCpuTime() - quantumForRR <= 0) {
+                                Event completionEvent = new Event(EventType.ProcessCompletion,
+                                        simulationClock.getSimulationTime() + p.getRemainingCpuTime());
+                                eventQueue.insertEvent(completionEvent);
+                            }
+                            // time slice interrupt if remTime - quantum > 0
+                            else if (p.getRemainingCpuTime() - quantumForRR > 0) {
+                                Event interrupt = new Event(EventType.TimeSliceOccurrence,
+                                        simulationClock.getSimulationTime() + quantumForRR);
+                                eventQueue.insertEvent(interrupt);
+                            }
+
+                        } // end else CPU is idle
                     }
                     //TODO: if SRTF, check process running on CPU against Ready Queue
                     //TODO: if queue has process w/ remainingCpuTime less than that of the running process, preempt
@@ -123,6 +145,9 @@ public class Simulator {
                      * Also the CPU is free to work on another process, so we must give it one
                      */
                     numProcessesHandled++;
+                    if (numProcessesHandled == 10000) {
+                        System.out.println("10000th process completing now");
+                    }
 
                     if(algorithmType == SchedulerType.FCFS.getSchedulerType()) {
 
@@ -161,11 +186,37 @@ public class Simulator {
 
                     }
                     else if (algorithmType == SchedulerType.RR.getSchedulerType()) {
+                        simulationCPU.getMyProcess().setRemainingCpuTime(0f); // process is done
+                        simulationCPU.getMyProcess().setCompletionTime(simulationClock.getSimulationTime());
+                        simulationCPU.getMyProcess().setWaitingTime(simulationCPU.getMyProcess().getCompletionTime()
+                                - simulationCPU.getMyProcess().getBurstTime());
+                        simulationCPU.getMyProcess().setTurnaroundTime(simulationCPU.getMyProcess().getCompletionTime()
+                                - simulationCPU.getMyProcess().getArrivalTime());
 
+                        // now that a process is complete, update runningSums that we will use to calculate statistics
+                        SchedulingAlgorithm.runningBurstTimeSum += simulationCPU.getMyProcess().getBurstTime();
+                        SchedulingAlgorithm.runningTurnaroundSum += simulationCPU.getMyProcess().getTurnaroundTime();
+                        SchedulingAlgorithm.runningWaitTimeSum += simulationCPU.getMyProcess().getWaitingTime();
+
+                        simulationCPU.setBusy(false);
+
+                        if (!schedulingAlgorithm.myQueue.isEmpty()) {
+                            simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
+                            // set start time for a new, non-returning process
+                            if(!simulationCPU.getMyProcess().isReturning()) {
+                                simulationCPU.getMyProcess().setStartTime(simulationClock.getSimulationTime());
+                            }
+
+                            determineCompletionOrQuantumInterrupt(quantumForRR, simulationClock, eventQueue, simulationCPU);
+                        } else {
+                            continue;
+                        }
                     }
                 } // end else-if to handle Process Completions
                 else if (eventToProcessType == EventType.TimeSliceOccurrence) {
-                    // TODO: logic to handle Round Robin Time slice occurrence event
+                    simulationCPU.getMyProcess().setRemainingCpuTime(simulationCPU.getMyProcess().getRemainingCpuTime() - quantumForRR);
+
+                    determineCompletionOrQuantumInterrupt(quantumForRR, simulationClock, eventQueue, simulationCPU);
                 }
 
             } // end while
@@ -222,28 +273,78 @@ public class Simulator {
         System.out.println("[quantum] : optional argument only required for Round Robin (scheduler_type = 3). Defines the length of the quantum time slice.");
     } // end printProgramInstructions
 
-    private static float urand() {
+    private static double urand() {
         Random rand = new Random();
-        float value = rand.nextFloat();
-        //value = (float) (Math.round(value * 100.0f)/100.0f);
+        double value = rand.nextDouble();
+
+        //value = (double) (Math.round(value * 100.0f)/100.0f);
+        //System.out.println(value);
         return value;
     } // end urand
 
-    private static float genexp(float lambda) {
-        float u, x;
-        x = 0f;
+    private static double genexp(double lambda) {
+        double u, x;
+        //Random rand = new Random();
+        //x =  (Math.log(1-rand.nextDouble())/(-lambda)) ;
+        x = 0;
         while (x == 0) {
             u = urand();
-            x = (float) ((-1f/lambda) * log(u));
+            //x = (-1/lambda)*log(Math.random());
+            x = log(1-u)/(-lambda) *10 ;
         }
+        System.out.println(x);
         return x;
     } // end genexp
 
-    private static void calculateStatistics(SchedulingAlgorithm s, float totalSimTime, int lambda) {
-        System.out.println("Avg turnaround time: " + s.avgTurnaroundTime(totalSimTime));
+    private static void determineCompletionOrQuantumInterrupt(double quantumForRR, Clock simulationClock, EventQueue eventQueue, CPU simulationCPU) {
+        if (simulationCPU.getMyProcess().getRemainingCpuTime() - quantumForRR <= 0) {
+            Event knownCompletion = new Event(EventType.ProcessCompletion,
+                    simulationClock.getSimulationTime() + simulationCPU.getMyProcess().getRemainingCpuTime());
+            eventQueue.insertEvent(knownCompletion);
+        }
+        else if (simulationCPU.getMyProcess().getRemainingCpuTime() - quantumForRR > 0) {
+            Event interrupt = new Event(EventType.TimeSliceOccurrence,
+                    simulationClock.getSimulationTime() + quantumForRR);
+            eventQueue.insertEvent(interrupt);
+        }
+    }
+
+    private static void calculateStatistics(SchedulingAlgorithm s, double totalSimTime, int lambda) throws IOException {
+        System.out.println("Avg turnaround time: " + s.avgTurnaroundTime());
         System.out.println("Total throughput: " + s.throughput(totalSimTime));
-        System.out.println("CPU utilization: " + s.cpuUtilization(totalSimTime));
+        System.out.println("CPU utilization: " + s.cpuUtilization());
         System.out.println("Avg # of processes in ready queue: " + s.avgProcessesInReadyQueue(lambda));
+
+        String header = "Lambda,Avg Turnaround,Throughput,CPU Util,Avg # Processes in RQ";
+        FileWriter pw = new FileWriter("test.csv", true);
+        BufferedReader br = new BufferedReader(new FileReader("test.csv"));
+        StringBuilder sb = new StringBuilder();
+
+        if(br.readLine() == null) {
+            sb.append("Lambda");
+            sb.append(',');
+            sb.append("Avg Turnaround");
+            sb.append(',');
+            sb.append("Throughput");
+            sb.append(',');
+            sb.append("CPU Util");
+            sb.append(',');
+            sb.append("Avg # Processes in RQ");
+        }
+
+        sb.append('\n');
+        sb.append(lambda);
+        sb.append(',');
+        sb.append(s.avgTurnaroundTime());
+        sb.append(',');
+        sb.append(s.throughput(totalSimTime));
+        sb.append(',');
+        sb.append(s.cpuUtilization());
+        sb.append(',');
+        sb.append(s.avgProcessesInReadyQueue(lambda));
+
+        pw.write(sb.toString());
+        pw.close();
     }
 
 } // end class

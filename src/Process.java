@@ -6,13 +6,13 @@
  * and whether we may consider it complete or not.
  */
 public class Process {
-    private float arrivalTime;      // = eventTIme
-    private float burstTime;        // clock + genexp(1/avgSvcTime)
-    private float completionTime;   //
-    private float waitingTime;      //
-    private float turnaroundTime;   // = completionTime - startTime
-    private float startTime;        // = clock when given to CPU
-    private float remainingCpuTime; //
+    private double arrivalTime;      // = eventTIme
+    private double burstTime;        // clock + genexp(1/avgSvcTime)
+    private double completionTime;   //
+    private double waitingTime;      //
+    private double turnaroundTime;   // = completionTime - startTime
+    private double startTime;        // = clock when given to CPU
+    private double remainingCpuTime; //
     private boolean isReturning;    //
 
     public Process() {
@@ -21,59 +21,59 @@ public class Process {
 
 
     /* Getters and Setters */
-    public float getArrivalTime() {
+    public double getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(float arrivalTime) {
+    public void setArrivalTime(double arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 
-    public float getBurstTime() {
+    public double getBurstTime() {
         return burstTime;
     }
 
-    public void setBurstTime(float burstTime) {
+    public void setBurstTime(double burstTime) {
         this.burstTime = burstTime;
     }
 
-    public float getCompletionTime() {
+    public double getCompletionTime() {
         return completionTime;
     }
 
-    public void setCompletionTime(float completionTime) {
+    public void setCompletionTime(double completionTime) {
         this.completionTime = completionTime;
     }
 
-    public float getWaitingTime() {
+    public double getWaitingTime() {
         return waitingTime;
     }
 
-    public void setWaitingTime(float waitingTime) {
+    public void setWaitingTime(double waitingTime) {
         this.waitingTime = waitingTime;
     }
 
-    public float getTurnaroundTime() {
+    public double getTurnaroundTime() {
         return turnaroundTime;
     }
 
-    public void setTurnaroundTime(float turnaroundTime) {
+    public void setTurnaroundTime(double turnaroundTime) {
         this.turnaroundTime = turnaroundTime;
     }
 
-    public float getStartTime() {
+    public double getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(float startTime) {
+    public void setStartTime(double startTime) {
         this.startTime = startTime;
     }
 
-    public float getRemainingCpuTime() {
+    public double getRemainingCpuTime() {
         return remainingCpuTime;
     }
 
-    public void setRemainingCpuTime(float remainingCpuTime) {
+    public void setRemainingCpuTime(double remainingCpuTime) {
         this.remainingCpuTime = remainingCpuTime;
     }
 

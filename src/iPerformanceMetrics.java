@@ -5,11 +5,11 @@
  */
 public interface iPerformanceMetrics {
 
-    float avgTurnaroundTime(float totalSimTime);
+    double avgTurnaroundTime();
 
-    float throughput(float totalSimTime);
+    double throughput(double totalSimTime);
 
-    float cpuUtilization(float totalSimTime);
+    double cpuUtilization();
 
-    float avgProcessesInReadyQueue(int lambda);
+    double avgProcessesInReadyQueue(int lambda);
 } // end interface

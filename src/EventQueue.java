@@ -22,7 +22,7 @@ public class EventQueue {
         return priorityQueue.poll();
     }
 
-    float getSystemTimeFromHead() {
+    double getSystemTimeFromHead() {
         return priorityQueue.peek().getEventTime();
     }
 
