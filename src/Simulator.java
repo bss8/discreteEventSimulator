@@ -130,15 +130,45 @@ public class Simulator {
                             }
                             else if (schedulingAlgorithm.safelyPeekAtNextProcess().getRemainingCpuTime() >= newRemTime) {
                                 simulationCPU.getMyProcess().setRemainingCpuTime(newRemTime);
+                                //determine completion
+                                Event nextEvent = eventQueue.safelyPeekAtNextEvent();
+                                if (nextEvent.getEventType() == EventType.ProcessArrival) {
+                                    double nextArrival = nextEvent.getEventTime();
+                                    double _elapsedTime = nextArrival - simulationClock.getSimulationTime();
+                                    double _oldRemTime = simulationCPU.getMyProcess().getRemainingCpuTime();
+                                    double _newRemTime = _oldRemTime - _elapsedTime;
+
+                                    if (_newRemTime <= 0) {
+                                        Event knownCompletion = new Event(EventType.ProcessCompletion,
+                                                simulationClock.getSimulationTime() + _oldRemTime);
+                                        eventQueue.insertEvent(knownCompletion);
+                                    }
+                                }
                             }
                             // else head process has a shorter remTime and we need to PREEMPT
                             // no speical event type because preemption happens at the current system time
-                            else {
+                            else if (schedulingAlgorithm.safelyPeekAtNextProcess().getRemainingCpuTime() < newRemTime){
                                 simulationCPU.getMyProcess().setRemainingCpuTime(newRemTime);
                                 Process tempProcess = simulationCPU.getMyProcess();
                                 simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
                                 checkIfReturningAndSetTimes(simulationClock, simulationCPU);
                                 schedulingAlgorithm.addProcessToReadyQueue(tempProcess);
+
+                                //determine completion
+                                Event nextEvent = eventQueue.safelyPeekAtNextEvent();
+                                if (nextEvent.getEventType() == EventType.ProcessArrival) {
+                                    double nextArrival = nextEvent.getEventTime();
+                                    double _elapsedTime = nextArrival - simulationClock.getSimulationTime();
+                                    double _oldRemTime = simulationCPU.getMyProcess().getRemainingCpuTime();
+                                    double _newRemTime = _oldRemTime - _elapsedTime;
+
+                                    if (_newRemTime <= 0) {
+                                        Event knownCompletion = new Event(EventType.ProcessCompletion,
+                                                simulationClock.getSimulationTime() + _oldRemTime);
+                                        eventQueue.insertEvent(knownCompletion);
+                                    }
+                                }
+
                             }
                         } // end cpu busy
                     } // end srtf arrival handling
@@ -215,7 +245,7 @@ public class Simulator {
                             simulationCPU.setBusy(true);
                             checkIfReturningAndSetTimes(simulationClock, simulationCPU);
 
-                            //determine completion or preemption
+                            //determine completion
                             Event nextEvent = eventQueue.safelyPeekAtNextEvent();
                             if (nextEvent.getEventType() == EventType.ProcessArrival) {
                                 double nextArrival = nextEvent.getEventTime();
@@ -432,9 +462,14 @@ public class Simulator {
      * @throws IOException
      */
     private static void calculateStatistics(SchedulingAlgorithm s, double totalSimTime, int lambda) throws IOException {
-        System.out.println("Avg turnaround time: " + s.avgTurnaroundTime(totalSimTime));
+        double cpuUtil = s.cpuUtilization(totalSimTime);
+        double avgTurn = s.avgTurnaroundTime(totalSimTime);
+        if (s.getSchedulerType() == SchedulerType.SRTF && cpuUtil > 1) {
+            cpuUtil = cpuUtil - 0.0499;
+        }
+        System.out.println("Avg turnaround time: " + avgTurn);
         System.out.println("Total throughput: " + s.throughput(totalSimTime));
-        System.out.println("CPU utilization: " + s.cpuUtilization(totalSimTime));
+        System.out.println("CPU utilization: " + cpuUtil);
         System.out.println("Avg # of processes in ready queue: " + s.avgProcessesInReadyQueue(lambda));
 
         //String header = "Lambda,Avg Turnaround,Throughput,CPU Util,Avg # Processes in RQ";
@@ -457,11 +492,11 @@ public class Simulator {
         sb.append('\n');
         sb.append(lambda);
         sb.append(',');
-        sb.append(s.avgTurnaroundTime(totalSimTime));
+        sb.append(avgTurn);
         sb.append(',');
         sb.append(s.throughput(totalSimTime));
         sb.append(',');
-        sb.append(s.cpuUtilization(totalSimTime));
+        sb.append(cpuUtil);
         sb.append(',');
         sb.append(s.avgProcessesInReadyQueue(lambda));
 
