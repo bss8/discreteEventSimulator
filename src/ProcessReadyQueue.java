@@ -3,7 +3,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * This class behaves as static - declared final to prevent extension of the class
  * Private constructor prevents instantiation by client code as we do not want to instantiate
  * Make all the members and functions of the class static - since the class cannot be instantiated

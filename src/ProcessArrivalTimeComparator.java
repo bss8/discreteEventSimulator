@@ -1,7 +1,7 @@
 import java.util.Comparator;
 
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Used by FCFS scheduler.
  * Compares processes by their arrival times, so the process that comes first is first in the queue.
  *

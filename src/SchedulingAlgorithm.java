@@ -1,5 +1,5 @@
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Strictly define allowed scheduler types by enumerating, preventing the use of "Magic numbers"
  * (i.e., using an int 1 directly to compare type or pass to constructor? What is 1?
  * SchedulerType.FCFS is clearer.
@@ -20,7 +20,7 @@ enum SchedulerType {
 } // end enum
 
 /**
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Main class definition for what constitutes a scheduling algorithm. Abstract definition of both properties and
  * behavior that all schedulers share.
  */

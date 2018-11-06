@@ -2,7 +2,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  *
  */
 public class EventQueue {

@@ -8,7 +8,7 @@ import static java.lang.Math.log;
 
 
 /***
-* @Author: Borislav Sabotinov
+* @author Borislav Sabotinov
 * This class drives the simulation of a single instance of a scheduler as specified by the user through
 * command line arguments.
  ***/

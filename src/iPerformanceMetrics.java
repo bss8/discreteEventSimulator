@@ -1,5 +1,5 @@
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Provides a contract for the type of metrics all schedulers will need to calculate. Requires continuously updating
  * certain intermediate variables (using values obtained as each Process is dealt with) throughout the simulation.
  */

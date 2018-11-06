@@ -1,7 +1,7 @@
 import java.util.Comparator;
 
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Used by SRTF scheduler.
  * Compares processes by their remainingCpuTime, so the process with the least remaining time is first in the queue.
  */

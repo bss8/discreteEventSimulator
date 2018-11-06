@@ -1,5 +1,5 @@
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Strictly typed events enumerated in enum to prevent the use of "magic numbers" directly
  * (i.e., passing 1, 2, or 3 directly to a constructor - what is 1?)
  */
@@ -15,7 +15,7 @@ enum EventType {
 } // end enum
 
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Defines what constitutes an event and internalizes the time at which it occurs
  */
 public class Event {

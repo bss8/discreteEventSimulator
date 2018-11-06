@@ -1,7 +1,7 @@
 import java.util.Comparator;
 
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * Events are compared by their time of arrival (which is later on used to set the Process' arrivalTime field)
  * so they may be processed sequentially and maintain the right Clock value for simulation time.
  */

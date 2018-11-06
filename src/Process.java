@@ -1,5 +1,5 @@
 /***
- * @Author: Borislav Sabotinov
+ * @author Borislav Sabotinov
  * A process's arrival time is the same as the Event ProcessArrival's eventTime.
  * The burst time is obtained by passing 1/avgServiceTime as the lambda in genexp(lambda)
  * The remainingCpuTime is initialized to burst time and is then used to track the process's progress on the CPU
