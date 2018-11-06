@@ -8,6 +8,12 @@ import java.util.Comparator;
  */
 public class ProcessArrivalTimeComparator implements Comparator<Process> {
 
+    /**
+     *
+     * @param p1
+     * @param p2
+     * @return
+     */
     @Override
     public int compare(Process p1, Process p2) {
         if (p1.getArrivalTime() < p2.getArrivalTime())

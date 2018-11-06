@@ -1,6 +1,6 @@
 /***
  * @Author: Borislav Sabotinov
- *
+ * Shortest Remaining Time First specialization class
  */
 public class SRTF extends SchedulingAlgorithm {
 

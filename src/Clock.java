@@ -13,6 +13,9 @@ class Clock {
         return simulationTime;
     }
 
+    /**
+     * @param _simulationTime
+     */
     void setSimulationTime(double _simulationTime) {
         simulationTime = _simulationTime;
     }

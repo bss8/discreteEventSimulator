@@ -7,6 +7,12 @@ import java.util.Comparator;
  */
 public class EventTimeComparator implements Comparator<Event> {
 
+    /**
+     *
+     * @param e1
+     * @param e2
+     * @return
+     */
     @Override
     public int compare(Event e1, Event e2) {
         if (e1.getEventTime() < e2.getEventTime())

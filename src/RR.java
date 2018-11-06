@@ -1,6 +1,6 @@
 /***
  * @Author: Borislav Sabotinov
- *
+ * Round Robin specialization class that inherits from abstract Scheduling Algorithm
  */
 public class RR extends SchedulingAlgorithm {
 

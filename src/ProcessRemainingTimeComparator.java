@@ -7,6 +7,12 @@ import java.util.Comparator;
  */
 public class ProcessRemainingTimeComparator implements Comparator<Process> {
 
+    /**
+     *
+     * @param p1
+     * @param p2
+     * @return
+     */
     @Override
     public int compare(Process p1, Process p2) {
         if (p1.getRemainingCpuTime() < p2.getRemainingCpuTime())

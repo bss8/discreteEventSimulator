@@ -5,7 +5,7 @@
  */
 public interface iPerformanceMetrics {
 
-    double avgTurnaroundTime();
+    double avgTurnaroundTime(double totalSimTime);
 
     double throughput(double totalSimTime);
 

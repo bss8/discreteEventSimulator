@@ -1,6 +1,8 @@
 /***
  * @Author: Borislav Sabotinov
- *
+ * Strictly define allowed scheduler types by enumerating, preventing the use of "Magic numbers"
+ * (i.e., using an int 1 directly to compare type or pass to constructor? What is 1?
+ * SchedulerType.FCFS is clearer.
  */
 
 enum SchedulerType {
@@ -17,26 +19,33 @@ enum SchedulerType {
     }
 } // end enum
 
-
+/**
+ * @Author: Borislav Sabotinov
+ * Main class definition for what constitutes a scheduling algorithm. Abstract definition of both properties and
+ * behavior that all schedulers share.
+ */
 public abstract class SchedulingAlgorithm implements iPerformanceMetrics {
 
     private SchedulerType schedulerType;
     ProcessReadyQueue myQueue;
 
-    static double runningTurnaroundSum = 0f;
-    static double runningBurstTimeSum = 0f;
-    static double runningWaitTimeSum = 0f;
+    static double runningTurnaroundSum = 0;
+    static double runningBurstTimeSum = 0;
+    static double runningWaitTimeSum = 0;
 
+    // default constructor to be overwritten by specialization classes FCFS, SRTF, RR
     SchedulingAlgorithm() {
 
     }
+
+    // Implement methods from interface as required
     @Override
-    public double avgTurnaroundTime() {
+    public double avgTurnaroundTime(double totalSimTime) {
       return runningTurnaroundSum / 10000;
     }
     @Override
     public double throughput(double totalSimTime) {
-      return 10000f / totalSimTime;
+      return 10000 / totalSimTime;
     }
     @Override
     public double cpuUtilization(double totalSimTime) {

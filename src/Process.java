@@ -4,6 +4,8 @@
  * The burst time is obtained by passing 1/avgServiceTime as the lambda in genexp(lambda)
  * The remainingCpuTime is initialized to burst time and is then used to track the process's progress on the CPU
  * and whether we may consider it complete or not.
+ * Each process maintains certain times that aid in both the processing of the process and in the computation of
+ * overall simulation statistics
  */
 public class Process {
     private double arrivalTime;      // = eventTIme

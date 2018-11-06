@@ -27,6 +27,10 @@ public final class ProcessReadyQueue {
         createProcessReadyQueue(schedulerType);
     }
 
+    /**
+     * @param schedulerType
+     * @return the instantiated object of our process ready queue, the only one permitted
+     */
     public static ProcessReadyQueue createSingleProcessReadyQueueInstance(int schedulerType) {
 
         //This logic will ensure that no more than one object can be created at a time
@@ -36,6 +40,12 @@ public final class ProcessReadyQueue {
         return obj;
     }
 
+    /**
+     * @param schedulerType
+     * depending on the argument passed to the constructor, create a Process Ready Queue for the scheduler
+     * Each has it's own comparator. FCFS uses arrival time to sort queue. SRTF uses remainingBurst times.
+     * RR uses neither - queue is a simple list where we insert at the tail and retrieve from the head (first in first out)
+     */
     private void createProcessReadyQueue(int schedulerType) {
         // FCFS
         if(schedulerType == SchedulerType.FCFS.getSchedulerType()) {
