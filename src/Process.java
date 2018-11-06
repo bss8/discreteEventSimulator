@@ -13,7 +13,8 @@ public class Process {
     private double turnaroundTime;   // = completionTime - startTime
     private double startTime;        // = clock when given to CPU
     private double remainingCpuTime; //
-    private boolean isReturning;    //
+    private boolean isReturning; //
+    private double restartTime;      //
 
     public Process() {
         this.isReturning = false;
@@ -81,7 +82,15 @@ public class Process {
         return isReturning;
     }
 
-    public void setReturning(boolean returning) {
-        isReturning = returning;
+    public void setIsReturning(boolean returning) {
+        this.isReturning = returning;
+    }
+
+    public double getRestartTime() {
+        return restartTime;
+    }
+
+    public void setRestartTime(double restartTime) {
+        this.restartTime = restartTime;
     }
 } // end class

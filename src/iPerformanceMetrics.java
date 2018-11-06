@@ -9,7 +9,7 @@ public interface iPerformanceMetrics {
 
     double throughput(double totalSimTime);
 
-    double cpuUtilization();
+    double cpuUtilization(double totalSimTime);
 
     double avgProcessesInReadyQueue(int lambda);
 } // end interface

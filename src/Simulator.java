@@ -15,7 +15,6 @@ import static java.lang.Math.log;
 
 public class Simulator {
 
-
     public static void main(String[] args) throws IOException {
 
         if (args.length == 0 || args[0].toLowerCase().equals("help")) {
@@ -30,11 +29,11 @@ public class Simulator {
             // initialize simulation clock to 0
             Clock simulationClock = new Clock();
             simulationClock.setSimulationTime(0f);
-//System.out.println("System time at start is: " + simulationClock.getSimulationTime());
-            // schedule an initial event - create Event and add to EventQueue
-            //Event initialEvent = new Event(EventType.ProcessArrival, genexp(lambda));
+
             EventQueue eventQueue = new EventQueue();
-            //eventQueue.insertEvent(initialEvent);
+
+            Event initialEvent = new Event(EventType.ProcessArrival, 0);
+            eventQueue.insertEvent(initialEvent);
 
             // create the scheduling algorithm and the CPU to handle processes
             SchedulingAlgorithm schedulingAlgorithm = createSchedulingAlgorithm(algorithmType);
@@ -42,21 +41,23 @@ public class Simulator {
 
             int numProcessesHandled = 0;
 
+            /*
+             * I experimented with generating all 10k processes up-front but this caused issues in the distribution
+             * and calculated statistics values. Generating new arrivals as we go is a preferred approach.
+             */
 
-            // generate 10k processes up front
-            for (int i = 0; i < 10000; i++) {
-                // Create new ProcessArrival Event and add to queue
-                Event nextArrivalEvent = new Event(EventType.ProcessArrival, genexp(lambda));
-                eventQueue.insertEvent(nextArrivalEvent);
-            } // end for
-//System.out.println("Event queue: " + eventQueue.toString());
+//            // generate 10k processes up front
+//            for (int i = 0; i < 10000; i++) {
+//                // Create new ProcessArrival Event and add to queue
+//                Event nextArrivalEvent = new Event(EventType.ProcessArrival, genexp(lambda));
+//                eventQueue.insertEvent(nextArrivalEvent);
+//            } // end for
+
             // while we have not processed N Processes to completion,
             // keep going and handle events in the EventQueue as needed
             while (numProcessesHandled < 10000) {
                 // 1) Set Clock to EventTime
                 simulationClock.setSimulationTime(eventQueue.getSystemTimeFromHead());
-
-//System.out.println(">>> System time is now at: " + eventQueue.getSystemTimeFromHead());
 
                 // 3) Do/process next event and remove from EventQueue
                 Event eventToProcess = eventQueue.returnAndRemoveHeadEvent();
@@ -70,18 +71,17 @@ public class Simulator {
                 * the completion times. FCFS is start time + burst time. RR is start time + quantum.
                 */
                 if (eventToProcessType == EventType.ProcessArrival) {
-//System.out.println("---WE HAVE AN ARRIVAL---");
+                    // routine to unconditionally create new arrival event
+                    unconditionallyCreateNewArrival(lambda, simulationClock, eventQueue);
                     // create the "arriving" process
                     Process p = new Process();
                     p.setArrivalTime(eventToProcess.getEventTime());  // processArrivalTime = eventTime
-//System.out.println("Process arrived at: " + p.getArrivalTime());
                     p.setBurstTime(genexp(1/avgServiceTime));
                     p.setRemainingCpuTime(p.getBurstTime());
-//System.out.println("Process burst time is: " + p.getBurstTime());
 
-                    // add new process to scheduler's ready queue
+                    // add new process to scheduler's ready queue unconditionally
+                    // only always use a process from the queue, not p directly
                     schedulingAlgorithm.addProcessToReadyQueue(p);
-
 
                     if (algorithmType == SchedulerType.FCFS.getSchedulerType()) {
                         // Give CPU a process from the ready queue and set busy = true
@@ -89,35 +89,20 @@ public class Simulator {
                         // so schedule a completion event
 
                         if(simulationCPU.isBusy()) {
-//System.out.println("CPU is busy and arriving process must wait in queue. Completion time cannot be determined now.");
                             continue;
                         } else {
-//System.out.println("CPU is IDLE and arriving process can start. Completion time can be determined now!");
                             //remove process from ready queue, give it to CPU
-                            simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
-                            simulationCPU.setBusy(true);
-                            p.setStartTime(simulationClock.getSimulationTime());  // start process time
-                            p.setWaitingTime(p.getStartTime() - p.getArrivalTime());
-
-                            Event knownCompletion = new Event(EventType.ProcessCompletion,
-                                    p.getStartTime() + p.getBurstTime());
-                            eventQueue.insertEvent(knownCompletion);
-//System.out.println("Event queue: " + eventQueue.toString());
-//System.out.println("Process completion will be: " + knownCompletion.getEventTime() + "; " +
-//                                        "current time is: " + simulationClock.getSimulationTime());
-                        }
-//System.out.println("Process start time: " + p.getStartTime());
-//System.out.println("Process waited for: " + p.getWaitingTime());
-
+                            fcfsGiveProcessToCpuAndScheduleCompletion(simulationClock, eventQueue, schedulingAlgorithm, simulationCPU);
+                        } // end cpu idle fcfs
                     } // end FCFS arrival handling
                     else if (algorithmType == SchedulerType.SRTF.getSchedulerType()) {
 
-                    }
+                    } // end srtf arrival handling
                     else if (algorithmType == SchedulerType.RR.getSchedulerType()) {
                         if (simulationCPU.isBusy()) {
 
                         } else {
-                            simulationCPU.setMyProcess(p);
+                            simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
                             simulationCPU.setBusy(true);
                             // completion if remTime - quantum <=0
                             if (p.getRemainingCpuTime() - quantumForRR <= 0) {
@@ -131,15 +116,10 @@ public class Simulator {
                                         simulationClock.getSimulationTime() + quantumForRR);
                                 eventQueue.insertEvent(interrupt);
                             }
-
                         } // end else CPU is idle
-                    }
-                    //TODO: if SRTF, check process running on CPU against Ready Queue
-                    //TODO: if queue has process w/ remainingCpuTime less than that of the running process, preempt
+                    } // end rr arrival handling
                 } // end if to handle Process Arrivals
                 else if (eventToProcessType == EventType.ProcessCompletion) {
-//System.out.println("---WE HAVE A COMPLETION---");
-
                     /* When an event completes, set its remainingCpuTime to zero
                      * increment numProcessesHandled counter.
                      * Also the CPU is free to work on another process, so we must give it one
@@ -151,47 +131,35 @@ public class Simulator {
 
                     if(algorithmType == SchedulerType.FCFS.getSchedulerType()) {
 
-                        simulationCPU.getMyProcess().setRemainingCpuTime(0f); // process is done
+                        simulationCPU.getMyProcess().setRemainingCpuTime(0); // process is done
                         simulationCPU.getMyProcess().setCompletionTime(simulationClock.getSimulationTime());
                         simulationCPU.getMyProcess().setTurnaroundTime(simulationCPU.getMyProcess().getCompletionTime()
-                                - simulationCPU.getMyProcess().getArrivalTime());
+                                - simulationCPU.getMyProcess().getStartTime());
 
                         // now that a process is complete, update runningSums that we will use to calculate statistics
                         SchedulingAlgorithm.runningBurstTimeSum += simulationCPU.getMyProcess().getBurstTime();
                         SchedulingAlgorithm.runningTurnaroundSum += simulationCPU.getMyProcess().getTurnaroundTime();
                         SchedulingAlgorithm.runningWaitTimeSum += simulationCPU.getMyProcess().getWaitingTime();
 
-//System.out.println("Process completed at: " + simulationCPU.getMyProcess().getCompletionTime());
-
                         simulationCPU.setBusy(false);
-                        if (!schedulingAlgorithm.myQueue.isEmpty()) {
-                            simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
-                            simulationCPU.getMyProcess().setStartTime(simulationClock.getSimulationTime());
-                            simulationCPU.getMyProcess().setWaitingTime(simulationCPU.getMyProcess().getStartTime() - simulationCPU.getMyProcess().getArrivalTime());
 
-                            Event knownCompletion = new Event(EventType.ProcessCompletion,
-                                    simulationCPU.getMyProcess().getStartTime() + simulationCPU.getMyProcess().getBurstTime());
-                            eventQueue.insertEvent(knownCompletion);
-//System.out.println("New process can start now at " + simulationCPU.getMyProcess().getStartTime());
-//System.out.println("Waiting time was: " + simulationCPU.getMyProcess().getWaitingTime());
+                        if (!schedulingAlgorithm.myQueue.isEmpty()) {
+                            fcfsGiveProcessToCpuAndScheduleCompletion(simulationClock, eventQueue, schedulingAlgorithm, simulationCPU);
                         } else {
                             continue;
                         }
-
-
-
-
-                    }
+                    } // end fcfs completion
                     else if (algorithmType == SchedulerType.SRTF.getSchedulerType()) {
 
-                    }
+                    } // end srtf completion
                     else if (algorithmType == SchedulerType.RR.getSchedulerType()) {
-                        simulationCPU.getMyProcess().setRemainingCpuTime(0f); // process is done
+                        simulationCPU.getMyProcess().setRemainingCpuTime(0); // process is done
                         simulationCPU.getMyProcess().setCompletionTime(simulationClock.getSimulationTime());
-                        simulationCPU.getMyProcess().setWaitingTime(simulationCPU.getMyProcess().getCompletionTime()
-                                - simulationCPU.getMyProcess().getBurstTime());
                         simulationCPU.getMyProcess().setTurnaroundTime(simulationCPU.getMyProcess().getCompletionTime()
-                                - simulationCPU.getMyProcess().getArrivalTime());
+                                - simulationCPU.getMyProcess().getStartTime());
+                        simulationCPU.getMyProcess().setWaitingTime(simulationCPU.getMyProcess().getTurnaroundTime()
+                                - simulationCPU.getMyProcess().getBurstTime());
+
 
                         // now that a process is complete, update runningSums that we will use to calculate statistics
                         SchedulingAlgorithm.runningBurstTimeSum += simulationCPU.getMyProcess().getBurstTime();
@@ -202,36 +170,54 @@ public class Simulator {
 
                         if (!schedulingAlgorithm.myQueue.isEmpty()) {
                             simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
+                            simulationCPU.setBusy(true);
                             // set start time for a new, non-returning process
                             if(!simulationCPU.getMyProcess().isReturning()) {
                                 simulationCPU.getMyProcess().setStartTime(simulationClock.getSimulationTime());
+                                simulationCPU.getMyProcess().setIsReturning(true);
                             }
 
                             determineCompletionOrQuantumInterrupt(quantumForRR, simulationClock, eventQueue, simulationCPU);
                         } else {
                             continue;
                         }
-                    }
+                    } // end RR completion
                 } // end else-if to handle Process Completions
                 else if (eventToProcessType == EventType.TimeSliceOccurrence) {
                     simulationCPU.getMyProcess().setRemainingCpuTime(simulationCPU.getMyProcess().getRemainingCpuTime() - quantumForRR);
-
                     determineCompletionOrQuantumInterrupt(quantumForRR, simulationClock, eventQueue, simulationCPU);
-                }
-
+                    // routine to unconditionally create new arrival event
+                    //unconditionallyCreateNewArrival(lambda, simulationClock, eventQueue);
+                } // end time slice occurrence
             } // end while
 
-            //TODO: 4) Generate and display statistical report
             System.out.println("Total sim time: " + simulationClock.getSimulationTime());
             calculateStatistics(schedulingAlgorithm, simulationClock.getSimulationTime(), lambda);
-
-
-
-
-
         } // end if-else args.length validation
-
     } // end main
+
+    private static void unconditionallyCreateNewArrival(int lambda, Clock simulationClock, EventQueue eventQueue) {
+        // routine to unconditionally create new arrival event
+        Event newArrival = new Event(EventType.ProcessArrival,
+                simulationClock.getSimulationTime() + genexp(lambda));
+        eventQueue.insertEvent(newArrival);
+    }
+
+    private static void fcfsGiveProcessToCpuAndScheduleCompletion(Clock simulationClock,
+                                                                  EventQueue eventQueue,
+                                                                  SchedulingAlgorithm schedulingAlgorithm,
+                                                                  CPU simulationCPU) {
+        simulationCPU.setMyProcess(schedulingAlgorithm.getNextProcessForCPU());
+        simulationCPU.setBusy(true);
+        simulationCPU.getMyProcess().setStartTime(simulationClock.getSimulationTime());
+        // we can do turnaround - burst but for FCFS, this works too
+        simulationCPU.getMyProcess().setWaitingTime(simulationCPU.getMyProcess().getStartTime()
+                - simulationCPU.getMyProcess().getArrivalTime());
+
+        Event knownCompletion = new Event(EventType.ProcessCompletion,
+                simulationCPU.getMyProcess().getStartTime() + simulationCPU.getMyProcess().getBurstTime());
+        eventQueue.insertEvent(knownCompletion);
+    }
 
     private static SchedulingAlgorithm createSchedulingAlgorithm(int algorithmType) {
         SchedulingAlgorithm schedulingAlgorithm;//validate that algorithmType is in range (1,3)
@@ -275,24 +261,18 @@ public class Simulator {
 
     private static double urand() {
         Random rand = new Random();
-        double value = rand.nextDouble();
 
-        //value = (double) (Math.round(value * 100.0f)/100.0f);
-        //System.out.println(value);
-        return value;
+        return rand.nextDouble();
     } // end urand
 
     private static double genexp(double lambda) {
         double u, x;
-        //Random rand = new Random();
-        //x =  (Math.log(1-rand.nextDouble())/(-lambda)) ;
         x = 0;
+
         while (x == 0) {
             u = urand();
-            //x = (-1/lambda)*log(Math.random());
-            x = log(1-u)/(-lambda) *10 ;
+            x = (-1/lambda)*log(u);
         }
-        System.out.println(x);
         return x;
     } // end genexp
 
@@ -307,15 +287,15 @@ public class Simulator {
                     simulationClock.getSimulationTime() + quantumForRR);
             eventQueue.insertEvent(interrupt);
         }
-    }
+    } // end method
 
     private static void calculateStatistics(SchedulingAlgorithm s, double totalSimTime, int lambda) throws IOException {
         System.out.println("Avg turnaround time: " + s.avgTurnaroundTime());
         System.out.println("Total throughput: " + s.throughput(totalSimTime));
-        System.out.println("CPU utilization: " + s.cpuUtilization());
+        System.out.println("CPU utilization: " + s.cpuUtilization(totalSimTime));
         System.out.println("Avg # of processes in ready queue: " + s.avgProcessesInReadyQueue(lambda));
 
-        String header = "Lambda,Avg Turnaround,Throughput,CPU Util,Avg # Processes in RQ";
+        //String header = "Lambda,Avg Turnaround,Throughput,CPU Util,Avg # Processes in RQ";
         FileWriter pw = new FileWriter("test.csv", true);
         BufferedReader br = new BufferedReader(new FileReader("test.csv"));
         StringBuilder sb = new StringBuilder();
@@ -339,12 +319,12 @@ public class Simulator {
         sb.append(',');
         sb.append(s.throughput(totalSimTime));
         sb.append(',');
-        sb.append(s.cpuUtilization());
+        sb.append(s.cpuUtilization(totalSimTime));
         sb.append(',');
         sb.append(s.avgProcessesInReadyQueue(lambda));
 
         pw.write(sb.toString());
         pw.close();
-    }
+    } // end calculateStatistics
 
 } // end class

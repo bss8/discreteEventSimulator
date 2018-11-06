@@ -52,7 +52,7 @@ public final class ProcessReadyQueue {
         // RR
         else if (schedulerType == 3) {
             // TODO: use LinkedList, insert new processes at the tail, remove from the head.
-            schedulerPriorityQueue = new LinkedList<Process>();
+            schedulerPriorityQueue = new LinkedList<>();
         }
     }
 
@@ -68,6 +68,10 @@ public final class ProcessReadyQueue {
 
     public boolean isEmpty() {
         return schedulerPriorityQueue.isEmpty();
+    }
+
+    public Process peek() {
+        return schedulerPriorityQueue.peek();
     }
 
 } // end class

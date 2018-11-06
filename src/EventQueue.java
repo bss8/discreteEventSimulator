@@ -22,6 +22,10 @@ public class EventQueue {
         return priorityQueue.poll();
     }
 
+    Event safelyPeekAtNextEvent() {
+        return priorityQueue.peek();
+    }
+
     double getSystemTimeFromHead() {
         return priorityQueue.peek().getEventTime();
     }

@@ -32,19 +32,19 @@ public abstract class SchedulingAlgorithm implements iPerformanceMetrics {
     }
     @Override
     public double avgTurnaroundTime() {
-      return runningTurnaroundSum / 10000f;
+      return runningTurnaroundSum / 10000;
     }
     @Override
     public double throughput(double totalSimTime) {
       return 10000f / totalSimTime;
     }
     @Override
-    public double cpuUtilization() {
-      return runningBurstTimeSum / 10000f;
+    public double cpuUtilization(double totalSimTime) {
+      return runningBurstTimeSum / totalSimTime;
     }
     @Override
     public double avgProcessesInReadyQueue(int lambda) {
-      return lambda * (runningWaitTimeSum/10000f);
+      return lambda * (runningWaitTimeSum/10000);
     }
 
 
@@ -59,6 +59,8 @@ public abstract class SchedulingAlgorithm implements iPerformanceMetrics {
     public Process getNextProcessForCPU() {
         return myQueue.returnAndRemoveHeadProcess();
     }
+
+    public Process safelyPeekAtNextProcess() { return myQueue.peek(); }
 
     public void addProcessToReadyQueue(Process p) {
         myQueue.insertProcess(p);
