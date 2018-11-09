@@ -419,6 +419,7 @@ public class Simulator {
     private static void printProgramInstructions() {
         System.out.println("Discrete event simulator for 3 scheduling algorithms. ");
         System.out.println("Author: Borislav Sabotinov");
+        System.out.println("Parameters 1 - 4 are required, including quantum even if it is not used by the scheduler.");
         System.out.println("java -jar DiscreteEventSimulator.jar <scheduler_type> <lambda> <avg. svc time> <quantum> <toggleSrtfCurve>");
         System.out.println("[scheduler_type] : value can be in the range (1,3) inclusive.");
         System.out.println("\t1 - First Come First Served (FCFS) Scheduler");

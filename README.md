@@ -42,7 +42,8 @@ A batch (Windows) or shell (Linux) script may be used to obtain simulation resul
          
  Discrete event simulator for 3 scheduling algorithms.    
  Author: Borislav Sabotinov   
- `java -jar DiscreteEventSimulator.jar <scheduler_type> <lambda> <avg. svc time> <quantum> <toggleSrtfCurve>`   
+ `java -jar DiscreteEventSimulator.jar <scheduler_type> <lambda> <avg. svc time> <quantum> <toggleSrtfCurve>`
+ Parameters 1 - 4 are required, including quantum even if it is not used by the scheduler.    
  #####[scheduler_type] : value can be in the range (1,3) inclusive.   
          1 - First Come First Served (FCFS) Scheduler   
          2 - Shortest Remaining Time First (SRTF) Scheduler   
