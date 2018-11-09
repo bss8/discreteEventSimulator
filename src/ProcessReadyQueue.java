@@ -84,4 +84,44 @@ public final class ProcessReadyQueue {
         return schedulerPriorityQueue.peek();
     }
 
+    /**
+     * This method is optional and allows the simulator to produce a "non-flat" curve.
+     * Some students recommended this approach and using it, their graphs presented a different view of SRTF
+     * that may be worth exploring. In my "default" submission, I choose not to use this and present the flat SRTF
+     * graphs.
+     * @param finalTime
+     */
+    public void iterateAndGetRemainingDifferenceForSRTF(double finalTime) {
+        for(Process p : schedulerPriorityQueue) {
+            Simulator.numProcessesHandled++;
+            p.setCompletionTime(finalTime);
+            double completionMinusStart = p.getCompletionTime() - p.getStartTime();
+            p.setTurnaroundTime(p.getCompletionTime() - p.getArrivalTime());
+            p.setWaitingTime((p.getStartTime() - p.getArrivalTime())
+                    + (completionMinusStart - p.getBurstTime()));
+            if (p.isReturning()) {
+                SchedulingAlgorithm.runningBurstTimeSum += p.getBurstTime();
+            }
+            SchedulingAlgorithm.runningTurnaroundSum += p.getTurnaroundTime();
+            SchedulingAlgorithm.runningWaitTimeSum += p.getWaitingTime();
+        }
+    }
+
+    /**
+     * Unlike the preceeding method for SRTF, this method is necessary for proper calculation of RR Cpu Utilization.
+     * The reason is - after lambda = 16.667 (approximation from curve, also via 1/0.06 = 16.667), the ready queue
+     * gets backed up from too many arriving processes. Round Robin begins to degenerate and provides quantums of service
+     * to some processes that never get a chance to complete. But the amount of Cpu service they receive needs to be accounted.
+     * Here, we simply add it back in to the numerator to obtain the correct result.
+     */
+    public void iterateAndGetRemainingDifferenceForRR() {
+        double workPerformed = 0;
+        for(Process p : schedulerPriorityQueue) {
+            if (p.isReturning()) {
+                workPerformed = p.getBurstTime() - p.getRemainingCpuTime();
+                SchedulingAlgorithm.runningBurstTimeSum += workPerformed;
+            }
+        }
+    }
+
 } // end class
