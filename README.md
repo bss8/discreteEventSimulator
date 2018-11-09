@@ -73,18 +73,18 @@ RR2 may spend more time servicing longer processes. Overall, we can confirm the 
 scheduler with too long a quantum may degenerate into FCFS. One caveat is if the quantum is too short, there may be 
 high overhead of context switch, though we do not consider it for the purposes of this simulation. 
 
-![alt text](https://imgur.com/a/DLf1Bj7)
+![alt text](https://i.imgur.com/ccb4e8F.png)
 
 When SRTF (method 1) is examined independently, we do see some slight variance in the flat lines, for a short range.
 
-![alt text](https://imgur.com/a/VfiQnBd)
+![alt text](https://i.imgur.com/IUcyI6O.png)
 
 ###Round Robin - RR1 vs RR2
 
 Let us zoom in on Round Robin and compare the two sets of data - one with a quantum of 0.01 and the other with a 
 quantum of 0.02. 
 
-![alt text](https://imgur.com/a/8BC0hxg)
+![alt text](https://i.imgur.com/pGQAgPQ.png)
 
 Both perform similarly in this simulation, with RR of quantum 0.01 slightly outperforming RR with quantum of 0.02. 
 As discussed previously, too large a quantum may be detrimental to the performance of this scheduler, while too small a 
