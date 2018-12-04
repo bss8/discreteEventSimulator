@@ -100,3 +100,7 @@ be a viable option unless we do what the text recommends and implement **aging**
 queue and assign them a higher priority the longer they wait, so that they may receive service as well at some point. 
 This is out of scope for this simulation and I do not implement aging or priority schemes for SRTF to address any 
 possible starvation.  
+
+## Class Diagram 
+(download or open in new tab & zoom in for details)
+![alt text](https://i.imgur.com/k1Y2Rte.png)
