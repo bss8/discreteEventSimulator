@@ -8,25 +8,25 @@ A batch (Windows) or shell (Linux) script may be used to obtain simulation resul
 #### On Windows: genData.bat 
 `del "test.csv" /q`         
 `FOR /L %%A IN (1,1,30) DO (`    
-&nbsp;&nbsp;&nbsp;`Java -jar "DiscreteEventSimulation.jar" 2 %%A 0.06 0.02`    
+&nbsp;&nbsp;&nbsp;`java -jar "DiscreteEventSimulation.jar" 2 %%A 0.06 0.02`    
 `)`    
 `move "test.csv" %temp%`
 
 #### On Linux: genData.bat
 `#!/bin/bash`    
-`rm sim.data`     
+`rm test.csv`     
 `for ((i = 1; i < 31; i++)); do`     
-&nbsp;&nbsp;&nbsp;`./sim 1 $i 0.06 0.01`    
-&nbsp;&nbsp;&nbsp;`cp sim.data /data/sim-1-$i-001.data`    
+&nbsp;&nbsp;&nbsp;`java -jar "DiscreteEventSimulation.jar" 1 $i 0.06 0.01`    
+&nbsp;&nbsp;&nbsp;`cp test.csv /data/test-1-$i-001.data`    
 `done`
  
  #####To see SRTF with special non-flat curve
  Add true as a fifth parameter when running the simulator
  `#!/bin/bash`    
- `rm sim.data`     
+ `rm test.csv`     
  `for ((i = 1; i < 31; i++)); do`     
- &nbsp;&nbsp;&nbsp;`./sim 1 $i 0.06 0.01 true`    
- &nbsp;&nbsp;&nbsp;`cp sim.data /data/sim-1-$i-001.data`    
+ &nbsp;&nbsp;&nbsp;`java -jar "DiscreteEventSimulation.jar" 1 $i 0.06 0.01 true`    
+ &nbsp;&nbsp;&nbsp;`cp test.csv /data/test-1-$i-001.data`    
  `done`
  
  As can be observed from the example scripts, to manually run the program, at    
